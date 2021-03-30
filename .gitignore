@@ -1,0 +1,5 @@
+.env
+knexfile.js
+package-lock.json
+node_modules
+jwt_generate.js
