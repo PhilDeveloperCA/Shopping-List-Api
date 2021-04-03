@@ -5,9 +5,9 @@ var morgan = require('morgan');
 
 const AuthRoutes = require('./routes/auth');
 const GroupRoutes = require('./routes/groups');
+
 const app = express();
 app.use(morgan('tiny'));
-
 app.use(bodyParser.json());
 
 
