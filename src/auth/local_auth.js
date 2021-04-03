@@ -23,8 +23,7 @@ module.exports.signup = async (req,res,next) => {
         else return true;
     }
 
-    
-    if(validusername(username) && validPassword(password)){
+    if(await validusername(username) && validPassword(password)){
         try {
             salt = await bcrypt.genSalt(10);
             new_password = await bcrypt.hash(password, salt);
@@ -34,6 +33,7 @@ module.exports.signup = async (req,res,next) => {
         }
         catch(e){
             console.log(e);
+            res.json('system error');
         }
     }
     else {
@@ -45,14 +45,13 @@ module.exports.signin = async(req,res,next) => {
     username = req.body.username;
     password = req.body.password;
 
-    user = await users.GetByUsername(username);
 
     try {
         user = await users.GetByUsername(username);
-        if(user[0].length == 0) res.json('Invalid Username');
+        if(user.length == 0) res.json('Invalid Username');
         validPassword = await bcrypt.compare(password, user[0].password);
         if(!validPassword) res.json('Invalid Password');
-        new_jwt = jwt.sign({sub : user.id, name: user.username}, process.env.JWT_SECRET)
+        new_jwt = jwt.sign({sub : user[0].id, name : user[0].username}, process.env.JWT_SECRET)
         res.send({
             username,
             jwt : new_jwt
@@ -60,6 +59,7 @@ module.exports.signin = async(req,res,next) => {
     }
     catch(err) {
         console.log(err);
+        res.json('System Error');
     }
 }
 
