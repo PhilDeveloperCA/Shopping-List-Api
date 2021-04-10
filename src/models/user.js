@@ -6,7 +6,7 @@ module.exports = {
         return user;
     },
     addLocalUser : (username, password) => {
-        return db('users').insert({username, password});
+        return db('users').insert({username, password}).returning('*');
     },
     
 }
