@@ -8,91 +8,144 @@ const invites = require('../models/invites');
 const groups = require('../models/groups');
 
 
-router.get('/create/', async (req,res,next) => {
+router.get('/create/', routeAuth, async (req,res,next) => {
     const name = req.query.name;
-    jwt.verify(req.headers.authorization, process.env.JWT_SECRET, async (err, user) => {
-        if(!err){
-            var new_group = await group.MakeGroup(name, user.sub)
-            res.json(new_group);
-        }
-        if(err) res.json(err);
-    })
+    if(name === undefined) return res.json('Enter a Valid Group Name');
+    var new_group = await group.MakeGroup(name, req.userid);
+    res.json(new_group);
 })
 
-router.get('/invite/send/:id', async (req,res,next) => {
-    const username = req.query.name;
+router.get('/invite/send/:id', routeAuth, async (req,res,next) => {
+    const username = req.query.username;
     const groupid = req.params.id;
-    userswithname = users.GetByUsername(username);
-    if(userswithname.length === 0) res.json('User Does Not Exist');
+    if(typeof username === 'string' || username instanceof String){
+        userswithname = await users.GetByUsername(username);
+        if(userswithname.length === 0) res.json('User Does Not Exist');
 
-    validateGroupBelonging = async (id) => {
-        useringroup = await group.GroupHasUser(id, groupid)
-        console.log(useringroup);
-        return (useringroup.length > 0);
+        validateGroupBelonging = async (id) => {
+            useringroup = await group.GroupHasUser(id, groupid)
+            return (useringroup.length > 0);
+        }
+
+        if( await validateGroupBelonging(req.userid)){
+            const user = await users.GetByUsername(username);
+            await invites.inviteUser(groupid, user[0].id);
+            res.json('Invited User');
+        }
+        else {
+            res.json('You are not a member of this group')
+        }
     }
-
-    jwt.verify(req.headers.authorization, process.env.JWT_SECRET, async (err,user) => {
-        if(!err){
-            if( await validateGroupBelonging(user.sub)){
-                const user = await users.GetByUsername(username);
-                await invites.inviteUser(groupid, user[0].id);
-                res.json('Invited User');
-            }
-            else {
-                res.json('You are not a member of this group')
-            }
-        }
-        if(err){
-            res.json('Invalidated');
-        }
-    });
-
+    else{
+        res.json('Enter a Valid Username');
+    }
 });
 
-router.get('/invite/accept/:groupid', async (req,res,next) => {
+router.get('/invite/accept/:groupid',routeAuth, async (req,res,next) => {
     const groupid = req.params.groupid;
 
     ValidateInvitation  = async (userid, groupid) => {
         useringroup = await invites.InvitationHasUser(userid, groupid)
-        console.log(useringroup.length>0);
         return (useringroup.length > 0);
     }
 
-    jwt.verify(req.headers.authorization, process.env.JWT_SECRET, async (err,user) =>{
-        if(!err){
-            if(await ValidateInvitation(user.sub,groupid)){
-                await groups.JoinGroup(user.sub, groupid);
-                await invites.deleteInvitation(user.sub,groupid);
-                res.json('Successfully Joined Group');
-            }
-            else{
-                res.json('invalid invitation');
-            }
+    try{    
+        if(await ValidateInvitation(req.userid,groupid)){
+            await groups.JoinGroup(req.userid, groupid);
+            await invites.deleteInvitation(req.userid,groupid);
+            res.json('Successfully Joined Group');
         }
         else{
-            res.json('invalid Auth Token');
+            res.json('invalid invitation');
         }
-    }) 
-})
-
-router.get('/group/mygroups', (req,res,next) => {
-    try{
-        jwt.verify(req.headers.authorization, process.env.JWT_SECRET, async (err, user) => {
-            if(!err){
-                var mygroups = await groups.GetByUserId(user.sub);
-                res.json(mygroups);
-            }
-        })
     }
     catch(err){
-
+        res.status(500).json('System Error');
     }
 })
 
-router.get('/group/leave/:groupid', (req,res,next) => {
-    groupid = req.params.id;
+router.get('/invite/reject/:id', routeAuth, async (req,res,next) => {
+    const group_id = req.params.id;
+    ValidateInvitation  = async (userid, groupid) => {
+        useringroup = await invites.InvitationHasUser(userid, groupid)
+        return (useringroup.length > 0);
+    }
+
+    try{
+        if(await ValidateInvitation(req.userid, group_id)){
+            await invites.deleteInvitation(req.userid, group_id);
+            return res.json('Successfully Deleted');
+        }
+        else return res.status(500).json('Error Deleting, Not Part of this Group')
+    }
+    catch(err){
+        res.status(500).json('System Error');
+    }   
 })
 
-router.post('/group/')
+router.get('/invite/getmyinvites', routeAuth, async  (req,res,next) => {
+    console.log(req.userid);
+    var myinvites = await invites.getInvites(req.userid);
+    res.json(myinvites);
+})
+
+router.get('/group/mygroups', routeAuth, async(req,res,next) => {
+    try{
+        var mygroups = await groups.GroupsByUser(req.userid);
+        res.json(mygroups);
+    }
+    catch(err){
+        console.log(err);
+    }
+})
+
+router.get('/delete/:groupid', routeAuth, async (req,res,next) => {
+    groupid = req.params.groupid;
+    try {
+        validateGroupBelonging = async (id) => {
+            useringroup = await group.GroupHasUser(id, groupid);
+            admin = await group.GetById(groupid);
+            return (useringroup.length > 0 && admin.admin === req.userid);
+        }
+
+        const groupbelonging = await validateGroupBelonging(req.userid);
+        if(validateGroupBelonging){
+            await group.deleteGroup(groupid);
+            res.json('Successfully Deleted  Group');
+        }
+        else {
+            res.status(400).json('You Must Assign Another Admin To Leave This Group');
+        }
+    }
+    catch(err){
+        res.json(err);
+        console.log(err);
+    }
+})
+
+router.get('/leave/:groupid',routeAuth, async (req,res,next) => {
+    groupid = req.params.id;
+
+    try {
+        validateGroupBelonging = async (id) => {
+            useringroup = await group.GroupHasUser(id, groupid);
+            admin = await group.GetById(groupid);
+            return (useringroup.length > 0 && admin.admin != req.userid);
+        }
+
+        const groupbelonging = await validateGroupBelonging(req.userid);
+        if(validateGroupBelonging){
+            await group.leaveGroup(req.userid, groupid);
+            res.json('Successfully Left Group');
+        }
+        else {
+            res.json('You Must Assign Another Admin To Leave This Group');
+        }
+    }   
+    catch(err){
+        console.log(err);
+    }
+});
+
 
 module.exports = router;
