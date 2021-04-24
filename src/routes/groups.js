@@ -64,6 +64,26 @@ router.get('/invite/accept/:groupid',routeAuth, async (req,res,next) => {
     }
 })
 
+router.get('/users/:groupid', routeAuth, async(req,res,next) => {
+    const group_id = req.params.groupid || null;
+    if(group_id== null) return res.status(500).json('Invalid Group Id');
+    console.log(group_id);
+    validateGroupBelonging = async (id) => {
+        useringroup = await group.GroupHasUser(id, req.params.groupid);
+        return (useringroup.length > 0);
+    }
+    try{
+        if(await validateGroupBelonging(req.userid)){
+            groupusers = await group.getGroupUsers(req.params.groupid);
+            return res.json(groupusers);
+        }
+    }
+    catch(err) {
+        console.log(err);
+        res.status(500).json('Server Side Errors');
+    }
+})
+
 router.get('/invite/reject/:id', routeAuth, async (req,res,next) => {
     const group_id = req.params.id;
     ValidateInvitation  = async (userid, groupid) => {

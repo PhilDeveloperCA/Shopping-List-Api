@@ -35,5 +35,10 @@ module.exports = {
     },
     leaveGroup: async (userid, groupid) => {
         await db('group_users').where('group_id',groupid, 'user_id',userid).del();
+    },
+    getGroupUsers: async (groupid) => {
+        const users = await db('group_users').where('group_id',groupid);
+        const users2 = await db.raw('SELECT users.id, username FROM users JOIN group_users ON group_users.user_id = users.id WHERE group_users.group_id = ?', [groupid]);
+        return users2.rows;
     }
 }

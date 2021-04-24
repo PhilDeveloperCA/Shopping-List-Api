@@ -74,7 +74,6 @@ else res.json('Invalid password / username')
 }
 
 module.exports.routeAuth = async(req,res,next) => {
-    console.log(req.headers.authorization);
     jwt.verify(req.headers.authorization, process.env.JWT_SECRET, (err,user) => {
         if(!err){
             req.userid = user.sub;
