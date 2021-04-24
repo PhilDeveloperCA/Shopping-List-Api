@@ -15,6 +15,7 @@ router.get('/add/:listid', auth.routeAuth, async (req,res,next) => {
     const name = req.query.name;
     const description = req.query.description;
     const listid = req.params.listid;
+    console.log(`name : ${name}, description : ${description}, list_id : ${listid}`)
 
     try {
         const groupid = await shoppinglists.getListById(listid);
@@ -28,6 +29,7 @@ router.get('/add/:listid', auth.routeAuth, async (req,res,next) => {
         }
     }
     catch(err){
+        console.log(err);
         res.status(500).json('System Error');
     }
 })
@@ -40,13 +42,24 @@ router.get('/get/:shoppinglistid', auth.routeAuth, async (req,res,next) => {
     catch(err){
         res.status(500).json('System Eror');
     }
-
 })
 
 router.get('/delete/:itemid', auth.routeAuth, async (req,res,next) => {
     const itemid = req.params.itemid;
-    await items.deleteItem(itemid);
-    res.json('Item Deleted');
+    try{
+        const item = await items.getItemById(itemid);
+        if(item[0].creator === req.userid){
+            await items.deleteItem(itemid);
+            res.json('Item Deleted');
+        }
+        else {
+            res.status(404).json('Unauthorized');
+        }
+    }
+    catch(e){
+        console.log(e);
+        res.status(500).json('System Error');
+    }
 })
 
 module.exports = router;
