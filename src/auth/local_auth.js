@@ -70,7 +70,7 @@ module.exports.signin = async(req,res,next) => {
     }
 }
 
-else res.json('Invalid password / username')
+else res.status(400).json('Invalid password / username')
 }
 
 module.exports.routeAuth = async(req,res,next) => {

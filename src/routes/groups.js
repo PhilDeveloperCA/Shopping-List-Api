@@ -10,7 +10,7 @@ const groups = require('../models/groups');
 
 router.get('/create/', routeAuth, async (req,res,next) => {
     const name = req.query.name;
-    if(name === undefined) return res.json('Enter a Valid Group Name');
+    if(name === undefined) return res.status(500).json('Enter a Valid Group Name');
     var new_group = await group.MakeGroup(name, req.userid);
     res.json(new_group);
 })

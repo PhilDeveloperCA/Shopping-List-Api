@@ -8,7 +8,7 @@ module.exports = {
         await db('group_users').insert({group_id, user_id});
     },
     getInvites : async (userid) => {
-        return await db('invitation_users').where('user_id', userid);
+        return await db('invitation_users').join('groups','groups.id','invitation_users.group_id').select('invitation_users.id', 'groups.name').where('user_id', userid);
     },
     getInviteById : async(id) => {
         return await db('invitation_users').where('id',id);
