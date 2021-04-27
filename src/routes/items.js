@@ -15,8 +15,8 @@ router.get('/add/:listid', auth.routeAuth, async (req,res,next) => {
     const name = req.query.name;
     const description = req.query.description;
     const listid = req.params.listid;
-    const category1 = req.query.category1;
-    const category2 = req.query.category2;
+    const category1 = req.query.category1 || null;
+    const category2 = req.query.category2 || null;
     console.log(req.params);
     try {
         const groupid = await shoppinglists.getListById(listid);
