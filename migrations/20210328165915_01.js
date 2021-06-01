@@ -1,32 +1,32 @@
 exports.up = function(knex) {
     return knex.schema.createTable('users', table => {
-        table.increments();
+        table.uuid('id');
         table.string('username').notNullable();
         table.string('password').notNullable();
     })
     .createTable('groups', (table) => {
-        table.increments();
+        table.uuid('id');
         table.integer('admin').references('id').inTable('users');
         table.string('name');
     })
     .createTable('group_users', table => {
-        table.increments();
+        table.uuid('id');
         table.integer('group_id').references('id').inTable('groups');
         table.integer('user_id').references('id').inTable('users');
     })
     .createTable('invitation_users', table => {
-      table.increments();
+      table.uuid('id');
       table.integer('group_id').references('id').inTable('groups');
       table.integer('user_id').references('id').inTable('users');
   })
   .createTable('shopping_list', table => {
-      table.increments();
+      table.uuid('id');
       table.string('name');
       table.integer('group_id').references('id').inTable('groups');
       table.integer('creator').references('id').inTable('users');
   })
   .createTable('items', table => {
-      table.increments();
+      table.uuid('id');
       table.string('name');
       table.string('description');
       table.integer('creator').references('id').inTable('users');

@@ -6,7 +6,68 @@ const group = require('../models/groups');
 const users = require('../models/user');
 const invites = require('../models/invites');
 const groups = require('../models/groups');
+const { BadRequest, Forbidden, NotFound } = require('../utils/errors');
+const db = require('../models/db');
+//const { route } = require('./items');
 
+
+router.post('/', routeAuth, async (req,res,next) => {
+    const name = req.body.name;
+    try {
+        if(!name) throw new BadRequest('Missing Required Fields : name');
+        const new_group = await db('groups').insert({name}).returning('*');
+        res.json(new_group);
+    }
+    catch(err){
+        next(err);
+    }
+});
+
+router.get('/', routeAuth, async(req,res,next) => {
+    try {
+        const usersGroups = await db('groups')
+        .select('groups.id','groups.name','groups.admin','users.username')
+        .join('group_users', 'group_users.user_id', req.userid)
+        .join('users','users.id','group_users.user_id')
+        .where('group_users.user_id', req.userid);
+
+        res.json(usersGroups);
+    }
+    catch(err){
+        next(err);
+    }
+})
+
+router.get('/:groupid', routeAuth, async(req,res,next) => {
+    const groupid = req.params.id;
+    try {
+        if(!groupid) throw new BadRequest('Missing Path Parameter : name');
+
+        const group = await db('groups').select('*').where('id', groupid);
+        if(group.length === 0) {throw new NotFound('No Such Group Exists');}
+
+        const userBelonging = await db('group_users').where('group_id', groupid).andWhere('user_id', req.userid);
+        if(userBelonging.length === 0) throw new Forbidden('Not a Member of This Group');
+
+        return res.status(200).json(group);
+    }
+    catch(err){
+        next(err);
+    }
+});
+
+router.put('/:groupid', routeAuth, async (req,res,next) => {
+    const groupid = req.params.groupid;
+    const name = req.body.name;
+    try {
+        if(!groupid || !name) throw new BadRequest('Missing Route Path or Name');
+        const editedGroup = await db('groups').where('id',groupid).update({name}).returning('*');
+        res.status(200).json(editedGroup[0]);
+    }
+    catch(err){
+        next(err);
+    }
+});
 
 router.get('/create/', routeAuth, async (req,res,next) => {
     const name = req.query.name;
@@ -40,6 +101,12 @@ router.get('/invite/send/:id', routeAuth, async (req,res,next) => {
         res.json('Enter a Valid Username');
     }
 });
+
+router.get('/invite/:groupid', routeAuth, async (req,res,next) => {
+    const groupid = req.params.groupid;
+
+
+})
 
 router.get('/invite/accept/:groupid',routeAuth, async (req,res,next) => {
     const groupid = req.params.groupid;
