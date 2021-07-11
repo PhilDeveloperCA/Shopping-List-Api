@@ -3,6 +3,7 @@ exports.up = function(knex) {
         table.uuid('id');
         table.string('username').notNullable();
         table.string('password').notNullable();
+        table.index('username');
     })
     .createTable('groups', (table) => {
         table.uuid('id');

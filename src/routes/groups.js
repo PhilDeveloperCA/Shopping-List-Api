@@ -13,6 +13,7 @@ const db = require('../models/db');
 
 router.post('/', routeAuth, async (req,res,next) => {
     const name = req.body.name;
+    console.log('Made It?');
     try {
         if(!name) throw new BadRequest('Missing Required Fields : name');
         const new_group = await db('groups').insert({name}).returning('*');

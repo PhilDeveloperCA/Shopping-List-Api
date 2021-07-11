@@ -9,11 +9,18 @@ const user = require('../models/user');
 
 module.exports.signup = async (req,res,next) => {
 
-    username = req.body.username;
-    password = req.body.password;
+    username = req.body.username || null;
+    password = req.body.password || null;
+
+    console.log(req.body);
+
+    if(username === null || password === null ){
+        return res.status(500).json('Missing Username and Password');
+    }
 
     validusername = async (username) => {
         user = await users.GetByUsername(username)
+        console.log(user);
         if(username.length< 6 || user.length>0){
             return false;
         }

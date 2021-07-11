@@ -14,7 +14,12 @@ module.exports.addGroup = async (req,res,next) => {
     try {
         if(!name) throw new BadRequest('Missing Required Fields : name');
         const new_group = await db('groups').insert({admin:req.userid, name}).returning('*');
-        await db('group_users').insert({user_id:admin, group_id:group[0].id});
+        
+        try {await db('group_users').insert({user_id:new_group[0].admin, group_id:new_group[0].id});}
+        catch(err){
+            console.log(err);
+        }
+        console.log(new_group);
         res.json(new_group);
     }
     catch(err){
