@@ -1,33 +1,33 @@
 exports.up = function(knex) {
     return knex.schema.createTable('users', table => {
-        table.uuid('id');
+        table.increments('id').primary();
         table.string('username').notNullable();
         table.string('password').notNullable();
         table.index('username');
     })
     .createTable('groups', (table) => {
-        table.uuid('id');
+        table.increments('id').primary();
         table.integer('admin').references('id').inTable('users');
         table.string('name');
     })
     .createTable('group_users', table => {
-        table.uuid('id');
+        table.increments('id').primary();
         table.integer('group_id').references('id').inTable('groups');
         table.integer('user_id').references('id').inTable('users');
     })
     .createTable('invitation_users', table => {
-      table.uuid('id');
+     table.increments('id').primary();
       table.integer('group_id').references('id').inTable('groups');
       table.integer('user_id').references('id').inTable('users');
   })
   .createTable('shopping_list', table => {
-      table.uuid('id');
+    table.increments('id').primary();
       table.string('name');
       table.integer('group_id').references('id').inTable('groups');
       table.integer('creator').references('id').inTable('users');
   })
   .createTable('items', table => {
-      table.uuid('id');
+    table.increments('id').primary();
       table.string('name');
       table.string('description');
       table.integer('creator').references('id').inTable('users');
