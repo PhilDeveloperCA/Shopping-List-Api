@@ -4,12 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./src/index.js"
+    "start": "nodemon ./src/index.js",
+    "init-claudia": "claudia generate-serverless-express-proxy --express-module ./src/index"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-serverless-express": "^3.4.0",
     "bcrypt": "^5.0.1",
+    "claudia": "^5.13.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
