@@ -9,16 +9,20 @@ module.exports = {
     client: 'postgresql',
     connection: {
       database: process.env.PG_DATBASE,
-      user:     process.env.PG_PASSWORD,
-      password: process.env.PG_PASSWORD
+      user:     process.env.PG_USER,
+      password: process.env.PG_PASSWORD,
+      host: process.env.PG_HOST,
+      port: process.env.PG_PORT
     }
   },
 
   staging: {
     connection: {
       database: process.env.PG_DATBASE,
-      user:     process.env.PG_PASSWORD,
-      password: process.env.PG_PASSWORD
+      user:     process.env.PG_USER,
+      password: process.env.PG_PASSWORD,
+      host: process.env.PG_HOST,
+      port: process.env.PG_PORT
     },
     pool: {
       min: 2,
@@ -29,14 +33,14 @@ module.exports = {
     }
   },
 
-  /*production: {
+  production: {
     client: 'postgresql',
     connection: {
-      database: keys.pgDatabase,
-      user:     keys.pgUser,
-      password: keys.pgDatabase,
-      port : keys.pgPort,
-      host : keys.pgHost
+      database: process.env.PG_DATBASE,
+      user:     process.env.PG_USER,
+      password: process.env.PG_PASSWORD,
+      host: process.env.PG_HOST,
+      port: process.env.PG_PORT
     },
     pool: {
       min: 2,
@@ -45,6 +49,6 @@ module.exports = {
     migrations: {
       tableName: 'knex_migrations'
     }
-  }*/
+  }
 
 };
