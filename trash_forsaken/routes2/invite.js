@@ -12,6 +12,6 @@ router.post('/', routeAuth, inviteController.sendInvite);
 
 router.delete('/:groupid', routeAuth, inviteController.declineInvite);
 
-router.post('/accept/:groupid', routeAuth, inviteController.acceptInvite);
+router.post('/:groupid', routeAuth, inviteController.acceptInvite);
 
 module.exports = router;

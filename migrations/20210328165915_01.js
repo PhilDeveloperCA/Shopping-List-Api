@@ -7,7 +7,7 @@ exports.up = function(knex) {
     })
     .createTable('groups', (table) => {
         table.increments('id').primary();
-        table.integer('admin').references('id').inTable('users');
+        table.integer('admin').references('id').inTable('users').Nullable();
         table.string('name');
     })
     .createTable('group_users', table => {

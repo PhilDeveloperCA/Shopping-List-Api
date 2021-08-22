@@ -1,11 +1,10 @@
 
-const db = require('../utils/db');
+const db = require('../models/db');
 const {Forbidden, BadRequest, NotFound} = require('../utils/errors');
 
 ValidateInvitation  = async (userid, groupid) => {
-    const groupuser =  await db.raw('SELECT id FROM invitation_users WHERE user_id = ? AND group_id = ? ', [userid, groupid]);;
-    const alreadyInGroup = await db('group_users').where('user_id',userid).andWhere('group_id', groupid);
-    return (groupuser.rows.length > 0 && alreadyInGroup.length === 0);
+    useringroup = await invites.InvitationHasUser(userid, groupid)
+    return (useringroup.length > 0);
 }
 
 module.exports.acceptInvite = async (req,res,next) => {
@@ -14,9 +13,7 @@ module.exports.acceptInvite = async (req,res,next) => {
     try {
         if(!groupid){
             throw new BadRequest('No Such Invitation Exists');
-        } 
-        const existing_invitation = await ValidateInvitation(req.userid, groupid);
-        if(!existing_invitation){
+        } if(await !ValidateInvitation(req.userid, groupid)){
             throw new Forbidden('No Such Invitation Exists')
         }
 
@@ -55,16 +52,21 @@ module.exports.declineInvite = async (req,res,next) => {
 }
 
 module.exports.sendInvite = async (req,res,next) => {
-    const username = req.body.username;
-    const groupid = req.body.groupid;
+    const username = req.query.username;
+    const groupid = req.params.id;
+
+    validateGroupBelonging = async (userid, groupid) => {
+        useringroup = await group.GroupHasUser(id, groupid)
+        return (useringroup.length > 0);
+    }
 
     try {
         if(!username || !groupid) throw new BadRequest('Request Missing Fields : username, id');
 
         const user = await db('users').where('username',username);
         if(user.length === 0) throw new NotFound('User With Given Username Does Not Exist');
-        const belonging = await validateGroupBelonging(req.userid, groupid);
-        if(!belonging) throw new Forbidden('');
+
+        if(await !validateGroupBelonging(req.userid, groupid)) throw new Forbidden('');
 
         await db('invitation_users').insert({user_id:user[0].id, group_id:groupid});
         res.json({message : 'User Successfully Invited'});

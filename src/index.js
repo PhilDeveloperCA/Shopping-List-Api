@@ -1,34 +1,32 @@
 const express = require('express');
-const routes = require('./routes/routes');
-const bodyParser = require('body-parser');
-var morgan = require('morgan');
+let morgan = require('morgan');
 
-const AuthRoutes = require('./routes/auth');
-const GroupRoutes = require('./routes/groups');
-const listRoutes = require('./routes/shoppinglist');
+
 const ItemRoutes = require('./routes/items');
 
-const AppRoutes = require('./routes2/groups');
-const InviteRoutes = require('./routes2/invite');
+const GroupRoutes = require('./routes/groups');
+const AuthRoutes = require('./routes/auth');
+const InviteRoutes = require('./routes/invite');
+const listRoutes = require('./routes/lists');
+const userRoutes = require('./routes/users');
 
 const cors = require('cors');
 const handleErrors = require('./utils/handleErrors');
 
 const app = express();
 app.use(morgan('tiny'));
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(cors({
     credentials:true,
 }));
 
-app.use('/app/group', (req,res,next) => {console.log('here'); next()}, AppRoutes);
-app.use('/app/invite', InviteRoutes);
-
-app.use('/auth', AuthRoutes);
-app.use('/group', GroupRoutes);
-app.use('/lists', listRoutes);
-app.use('/items', ItemRoutes);
+app.use('/api/auth', AuthRoutes);
+app.use('/api/group', GroupRoutes);
+app.use('/api/lists', listRoutes);
+app.use('/api/items', ItemRoutes);
+app.use('/api/invite', InviteRoutes);
+app.use('/api/users', userRoutes);
 
 app.use(handleErrors);
 

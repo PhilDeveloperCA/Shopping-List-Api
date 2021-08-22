@@ -2,10 +2,9 @@
 require('dotenv').config();
 
 const bcrypt = require('bcrypt');
-const users = require('../models/user');
 const jwt = require('jsonwebtoken');
-const groups = require('../models/groups');
-const user = require('../models/user');
+const { Unauthorized } = require('../utils/errors');
+const db = require('../utils/db');
 
 module.exports.signup = async (req,res,next) => {
 
@@ -19,8 +18,7 @@ module.exports.signup = async (req,res,next) => {
     }
 
     validusername = async (username) => {
-        user = await users.GetByUsername(username)
-        console.log(user);
+        const user = await db('users').where('username',username);
         if(username.length< 6 || user.length>0){
             return false;
         }
@@ -36,7 +34,7 @@ module.exports.signup = async (req,res,next) => {
         try {
             salt = await bcrypt.genSalt(10);
             new_password = await bcrypt.hash(password, salt);
-            var user = await users.addLocalUser(username,new_password);
+            var user = await db('users').insert({username, password:new_password});
             var new_jwt = jwt.sign({sub : user[0].id, name: user[0].username}, process.env.JWT_SECRET);
             res.json({jwt:new_jwt, user});
         }
@@ -58,7 +56,7 @@ module.exports.signin = async(req,res,next) => {
 
     if(username.length>6 && password.length>6) {        
     try {
-        var user = await users.GetByUsername(username);
+        let user = await db('users').where('username',username);
         if(user.length == 0) res.json('Invalid Username');
         else{
             validPassword = await bcrypt.compare(password, user[0].password);
@@ -81,13 +79,22 @@ else res.status(400).json('Invalid password / username')
 }
 
 module.exports.routeAuth = async(req,res,next) => {
+    try{
     jwt.verify(req.headers.authorization, process.env.JWT_SECRET, (err,user) => {
         if(!err){
             req.userid = user.sub;
-            next();
+            return next();
         }
-        if(err) res.json('Not Authenticated');
+        if(err){
+            //next(err);
+            //throw Unauthorized("");
+            return res.status(401).json({err:"Unauthenticated"});
+        };
     })
+    }
+    catch(err){
+        next(err);
+    }
 }
 
 module.exports.groupAuth = async (groupid) => {
