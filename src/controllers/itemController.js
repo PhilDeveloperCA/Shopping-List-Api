@@ -70,7 +70,6 @@ module.exports.deleteItem = async(req,res,next) => {
         }
     }
     catch(e){
-        console.log(e);
         res.status(500).json('System Error');
     }        
 }
