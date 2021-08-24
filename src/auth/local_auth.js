@@ -39,8 +39,7 @@ module.exports.signup = async (req,res,next) => {
             res.json({jwt:new_jwt, user});
         }
         catch(e){
-            console.log(e);
-            res.json('system error');
+            next(e);
         }
     }
     else {
@@ -70,8 +69,7 @@ module.exports.signin = async(req,res,next) => {
         }
     }
     catch(err) {
-        console.log(err);
-        res.json('System Error');
+        next(err);
     }
 }
 
@@ -80,14 +78,13 @@ else res.status(400).json('Invalid password / username')
 
 module.exports.routeAuth = async(req,res,next) => {
     try{
+    console.log(req.headers.authorization);
     jwt.verify(req.headers.authorization, process.env.JWT_SECRET, (err,user) => {
         if(!err){
             req.userid = user.sub;
             return next();
         }
         if(err){
-            //next(err);
-            //throw Unauthorized("");
             return res.status(401).json({err:"Unauthenticated"});
         };
     })
