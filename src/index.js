@@ -31,3 +31,5 @@ app.use('/api/users', userRoutes);
 app.use(handleErrors);
 
 app.listen(5000);
+
+module.exports = app;
