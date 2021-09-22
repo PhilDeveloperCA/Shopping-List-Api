@@ -34,9 +34,9 @@ app.use(cors(corsOptions));
 app.use(morgan('tiny'));
 app.use(express.json());
 
-app.use((req,res,next) => {
+/*app.use((req,res,next) => {
     console.log(req.headers.origin);
-})
+})*/
 
 app.use('/api/auth', AuthRoutes);
 app.use('/api/group', GroupRoutes);
