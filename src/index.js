@@ -11,18 +11,17 @@ const listRoutes = require('./routes/lists');
 const userRoutes = require('./routes/users');
 
 const cors = require('cors');
-var whitelist = ['localhost', 'shoppinglistapp.pranosaurs-portfolio.com']
+var whitelist = ['http://localhost', 'https://shoppinglistapp.pranosaurs-portfolio.com']
 
 var corsOptions = {
     credentials: true,
-    /*origin: function (origin, callback) {
+    origin: function (origin, callback) {
       if (whitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {
         callback(new Error('Not allowed by CORS'))
       }
-    }*/
-    origin: "*"
+    }
   }
 
 
