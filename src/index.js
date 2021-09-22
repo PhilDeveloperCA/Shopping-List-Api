@@ -11,7 +11,7 @@ const listRoutes = require('./routes/lists');
 const userRoutes = require('./routes/users');
 
 const cors = require('cors');
-var whitelist = ['localhost']
+var whitelist = ['localhost', 'shoppinglistapp.pranosaurs-portfolio.com']
 
 var corsOptions = {
     credentials: true,
