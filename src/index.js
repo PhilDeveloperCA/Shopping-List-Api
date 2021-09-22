@@ -11,17 +11,12 @@ const listRoutes = require('./routes/lists');
 const userRoutes = require('./routes/users');
 
 const cors = require('cors');
-var whitelist = ['http://localhost', 'https://shoppinglistapp.pranosaurs-portfolio.com']
+//var whitelist = ['http://localhost', 'https://shoppinglistapp.pranosaurs-portfolio.com']
+let allowedOrigin = process.env.NODE_ENV === 'production'? 'https://shoppinglistapp.pranosaurs-portfolio.com':'http://localhost'
 
-var corsOptions = {
+let corsOptions = {
     credentials: true,
-    origin: function (origin, callback) {
-      if (whitelist.indexOf(origin) !== -1) {
-        callback(null, true)
-      } else {
-        callback(new Error('Not allowed by CORS'))
-      }
-    }
+    origin: allowedOrigin
   }
 
 
