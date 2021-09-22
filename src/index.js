@@ -15,24 +15,28 @@ var whitelist = ['localhost', 'shoppinglistapp.pranosaurs-portfolio.com']
 
 var corsOptions = {
     credentials: true,
-    origin: function (origin, callback) {
+    /*origin: function (origin, callback) {
       if (whitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {
         callback(new Error('Not allowed by CORS'))
       }
-    }
+    }*/
+    origin: "*"
   }
 
 
 const handleErrors = require('./utils/handleErrors');
 
 const app = express();
+app.use(cors(corsOptions));
+
 app.use(morgan('tiny'));
 app.use(express.json());
 
-
-app.use(cors(corsOptions));
+app.use((req,res,next) => {
+    console.log(req.headers.origin);
+})
 
 app.use('/api/auth', AuthRoutes);
 app.use('/api/group', GroupRoutes);
