@@ -11,15 +11,28 @@ const listRoutes = require('./routes/lists');
 const userRoutes = require('./routes/users');
 
 const cors = require('cors');
+var whitelist = ['localhost']
+
+var corsOptions = {
+    credentials: true,
+    origin: function (origin, callback) {
+      if (whitelist.indexOf(origin) !== -1) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    }
+  }
+
+
 const handleErrors = require('./utils/handleErrors');
 
 const app = express();
 app.use(morgan('tiny'));
 app.use(express.json());
 
-app.use(cors({
-    credentials:true,
-}));
+
+app.use(cors(corsOptions));
 
 app.use('/api/auth', AuthRoutes);
 app.use('/api/group', GroupRoutes);
